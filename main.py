@@ -6,6 +6,7 @@ from typing import List
 from uuid import uuid4
 from dotenv import dotenv_values
 config = dotenv_values(".env")
+
 # Importez vos fonctions existantes
 from function import perform_timed_purchase_batch
 

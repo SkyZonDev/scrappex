@@ -1,4 +1,5 @@
 from fastapi import FastAPI, BackgroundTasks
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from datetime import datetime
 import logging
@@ -24,9 +25,18 @@ purchase_results = {}
 
 class PurchaseRequest(BaseModel):
     lots: List[int]
-    purchase_times: List[datetime]
+    purchase_times: datetime
 
 app = FastAPI()
+# Configuration CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Permet toutes les origines
+    allow_credentials=True,
+    allow_methods=["*"],  # Permet toutes les méthodes HTTP (GET, POST, etc.)
+    allow_headers=["*"],  # Permet tous les en-têtes
+)
+
 
 @app.post("/schedule-purchases")
 async def schedule_purchases(request: PurchaseRequest, background_tasks: BackgroundTasks):
@@ -39,7 +49,7 @@ async def schedule_purchases(request: PurchaseRequest, background_tasks: Backgro
     try:
         # Initialiser les résultats avec un statut en attente
         purchase_results[request_id] = {
-            "status": "pending",
+            "status": "En attente",
             "lots": request.lots,
             "purchase_times": request.purchase_times,
             "results": None,
@@ -94,7 +104,7 @@ async def perform_purchases(request_id: str, lots: List[int], purchase_times: Li
 
         # Mettre à jour les résultats
         purchase_results[request_id].update({
-            "status": "completed",
+            "status": 'Succès',
             "results": results
         })
 
@@ -105,7 +115,7 @@ async def perform_purchases(request_id: str, lots: List[int], purchase_times: Li
     except Exception as e:
         # En cas d'erreur, mettre à jour les résultats
         purchase_results[request_id].update({
-            "status": "error",
+            "status": "Erreur",
             "error": str(e)
         })
         logger.error(f"Erreur lors des achats : {e}")

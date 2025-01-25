@@ -181,11 +181,11 @@ async def perform_synchronized_purchase(
 
     result = {
         'lot': lot,
-        'purchase_time': purchase_time,
+        'duration_ms': purchase_result['duration_ms'],
         'success': purchase_result is not None,
         'details': purchase_result
     }
-
+    
     logger.info(f"Purchase for Lot {lot}: {'Success' if purchase_result else 'Failure'}")
     return result
 
@@ -209,15 +209,11 @@ async def perform_timed_purchase_batch(
     print("\nConnexion réussie !\n")
 
     try:
-        # Sort lots and times together to ensure correct pairing
-        purchase_queue = sorted(zip(lots, purchase_times), key=lambda x: x[1])
-
-        # Create tasks for each lot purchase with synchronized waiting
         purchase_tasks = []
-        for lot, purchase_time in purchase_queue:
+        for lot in lots:
             # Create a task that waits and then performs purchases
             task = asyncio.create_task(perform_synchronized_purchase(
-                session, base_url, csrf_token, lot, password, purchase_time
+                session, base_url, csrf_token, lot, password, purchase_times
             ))
             purchase_tasks.append(task)
 
@@ -232,29 +228,3 @@ async def perform_timed_purchase_batch(
             await session.close()
 
     return results
-
-# async def main():
-#     BASE_URL = "https://ceo.grand-est-automobiles.fr/"
-#     LOGIN = "bmotors69100@gmail.com"
-#     PASSWORD = "K784"
-
-#     # Example usage: Purchase specific lots at precise times
-#     lots = [21]
-#     purchase_times = [
-#         datetime.now() + timedelta(minutes=0)  # Perform purchase now
-#     ]
-
-#     results = await perform_timed_purchase_batch(
-#         BASE_URL, LOGIN, PASSWORD, lots, purchase_times
-#     )
-
-#     for result in results:
-#         print(f"Lot {result['lot']} at {result['purchase_time']}:")
-#         print(f"Status request: {'Success' if result['success'] is not None else 'Failure'}")
-#         print(f"Status buy: {'Success' if result['success'] else 'Failure'}")
-#         if result['details']:
-#             print(f"  Duration: {result['details']['duration_ms']:.2f} ms")
-#             print(f"  Response: {result['details']['response_text']}\n")
-
-# if __name__ == "__main__":
-#     asyncio.run(main())

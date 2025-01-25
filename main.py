@@ -2,9 +2,10 @@ from fastapi import FastAPI, BackgroundTasks
 from pydantic import BaseModel
 from datetime import datetime
 import logging
-from typing import List, Dict
+from typing import List
 from uuid import uuid4
-
+from dotenv import dotenv_values
+config = dotenv_values(".env")
 # Importez vos fonctions existantes
 from function import perform_timed_purchase_batch
 
@@ -13,9 +14,9 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Configuration constantes
-BASE_URL = "https://ceo.grand-est-automobiles.fr/"
-LOGIN = "bmotors69100@gmail.com"
-PASSWORD = "K784"
+BASE_URL = config["BASE_URL"]
+LOGIN = config["LOGIN"]
+PASSWORD = config["PASSWORD"]
 
 # Dictionnaire pour stocker les résultats des achats
 purchase_results = {}
